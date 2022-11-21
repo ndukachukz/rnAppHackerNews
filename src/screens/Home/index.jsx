@@ -27,6 +27,7 @@ export default () => {
       setState(prevState => ({
         ...prevState,
         isLoading: true,
+        refreshing: false,
       }));
       setContent(await getStoryContents());
       setState(prevState => ({
@@ -36,27 +37,27 @@ export default () => {
     })();
   }, []);
 
-  const onRefresh = useCallback(async () => {
+  const onRefresh = async () => {
+    setContent(null);
     setState(prevState => ({
       ...prevState,
       refreshing: true,
       isLoading: true,
     }));
-    setContent(null);
+    const res = await getStoryContents();
     setContent(await getStoryContents());
     setState(prevState => ({
       ...prevState,
       refreshing: false,
       isLoading: true,
     }));
-  }, []);
-
+  };
   return (
     <SafeAreaView style={style.screen}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       {state.isLoading ? (
         <FlatList
-          data={[1, 1, 1, 1, 1, 1, 1, 1]}
+          data={Array(10)}
           renderItem={() => <HomeLoading />}
           ItemSeparatorComponent={<View style={{marginBottom: 25}} />}
         />

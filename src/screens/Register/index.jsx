@@ -18,7 +18,7 @@ export default ({navigation}) => {
     }));
 
   const onSubmit = () => {
-    saveUser({email, name});
+    saveUser(navigation, {email, name});
   };
   return (
     <View style={styles.screen}>

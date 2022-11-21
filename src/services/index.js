@@ -1,8 +1,10 @@
+/* eslint-disable curly */
+/* eslint-disable prettier/prettier */
 import axios from 'axios';
 
 export {createTable, getDBConnection, saveUser} from './db';
 
-export const baseUrl = `https://hacker-news.firebaseio.com`;
+export const baseUrl = 'https://hacker-news.firebaseio.com';
 export const newStoriesUrl = `${baseUrl}/v0/newstories.json`;
 export const storyUrl = `${baseUrl}/v0/item`;
 
@@ -11,7 +13,7 @@ export const getStoryIds = async setState => {
     const result = await axios.get(newStoriesUrl);
     return result.data;
   } catch (error) {
-    console.log(`Error getting IDs => `, error.message);
+    console.log('Error getting IDs => ', error.message);
     if (error.code === 'ERR_NETWORK')
       setState(prevState => ({
         ...prevState,
@@ -26,7 +28,7 @@ export const getStoryItem = async id => {
     // console.log(result.data);
     return result.data;
   } catch (error) {
-    console.log(`Error getting item => `, error.message);
+    console.log('Error getting item => ', error.message);
   }
 };
 
@@ -35,7 +37,7 @@ export const getStoryContents = async () => {
   try {
     const idArr = await getStoryIds();
 
-    console.log(idArr.length);
+    console.log('ID LENGTH =>', idArr.length);
 
     if (idArr)
       for (let i = 0; i < idArr.length; i++) {
@@ -45,6 +47,6 @@ export const getStoryContents = async () => {
       }
     return storiesArr;
   } catch (error) {
-    console.log(`Error getting contents => `, error.message);
+    console.log('Error getting contents => ', error.message);
   }
 };

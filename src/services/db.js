@@ -1,12 +1,11 @@
+/* eslint-disable prettier/prettier */
 import {Alert} from 'react-native';
 import {openDatabase} from 'react-native-sqlite-storage';
 
 export const getDBConnection = openDatabase(
   {name: 'rnApp', location: 'default'},
-  success => console.log('DB Connection Success ', success),
-  error => {
-    console.log('ERROR DB CONNECTION =>', error);
-  },
+  success => console.log('DB Connection Success'),
+  error => console.log('ERROR DB CONNECTION => ', error),
 );
 
 export const createTable = () => {
@@ -46,13 +45,20 @@ export const getUser = async email => {
   }
 };
 
-export const saveUser = ({name, email}) => {
-  const insertQuery = `INSERT OR REPLACE INTO User(Name, Email) values (?, ?)`;
+export const saveUser = (navigation, {name, email}) => {
+  const insertQuery = 'INSERT INTO Users(Name, Email) values (?, ?)';
 
   getDBConnection.transaction(tx => {
-    tx.executeSql(insertQuery, [name, email])
-      .then(res => console.log({res}))
-      .catch(error => console.log('userCreateError => ', error));
-    Alert.alert('User Created Successfully');
+    tx.executeSql(insertQuery, [name, email], (tx, res) => {
+      console.log('Results', res.rowsAffected);
+      if (res.rowsAffected > 0) {
+        Alert.alert('Success', 'You are Registered Successfully', [
+          {
+            text: 'Ok',
+            onPress: () => navigation.navigate('Home'),
+          },
+        ]);
+      } else alert('Registration Failed');
+    });
   });
 };
