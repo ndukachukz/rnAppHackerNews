@@ -13,6 +13,8 @@ export default () => {
         and I have a passion for problem-solving and developing software with a
         good user interface and awesome user experience.
       </Text>
+      <Text>DOB: 2002 aug 8</Text>
+      <Text>current location: Lagos</Text>
     </View>
   );
 };

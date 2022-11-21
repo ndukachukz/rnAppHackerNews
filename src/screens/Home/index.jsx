@@ -1,56 +1,64 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {
   FlatList,
   RefreshControl,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   useColorScheme,
   View,
 } from 'react-native';
 import style from './style';
-import {getStoryContents} from '../../services';
+import {getStoryContents, getStoryIds, getStoryItem} from '../../services';
 import {NewsItem, HomeLoading} from '../../component/';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  setContent,
+  toggleIsLoading,
+  toggleRefreshing,
+} from '../../store/reducers';
 
 export default () => {
   const isDarkMode = useColorScheme() === 'dark';
+  const {content, ...state} = useSelector(store => store.appReducer);
+  const dispatch = useDispatch();
 
-  const [state, setState] = useState({
-    isLoading: false,
-    refreshing: false,
-  });
-  const [content, setContent] = useState([]);
-  const triggerRef = useRef(null);
+  const fetchContents = useCallback(async () => {
+    let storiesArr = [];
 
-  useEffect(() => {
-    (async () => {
-      setState(prevState => ({
-        ...prevState,
-        isLoading: true,
-        refreshing: false,
-      }));
-      setContent(await getStoryContents());
-      setState(prevState => ({
-        ...prevState,
-        isLoading: false,
-      }));
-    })();
+    try {
+      const idArr = await getStoryIds();
+      dispatch(toggleIsLoading(true));
+      dispatch(toggleRefreshing(false));
+
+      console.log('ID LENGTH =>', idArr.length);
+
+      for (let i = 0; i < idArr.length; i++) {
+        const id = idArr[i];
+
+        storiesArr.unshift(await getStoryItem(id));
+      }
+    } catch (error) {
+      console.log('Error getting contents => ', error.message);
+    } finally {
+      console.log('STORIES ARR => ', storiesArr);
+      dispatch(setContent(storiesArr));
+      dispatch(toggleIsLoading(false));
+    }
   }, []);
 
+  useEffect(() => {
+    fetchContents();
+  }, []);
+
+  useEffect(() => {
+    console.log('=> ', {state, content});
+  }, [state, content]);
+
   const onRefresh = async () => {
-    setContent(null);
-    setState(prevState => ({
-      ...prevState,
-      refreshing: true,
-      isLoading: true,
-    }));
-    const res = await getStoryContents();
-    setContent(await getStoryContents());
-    setState(prevState => ({
-      ...prevState,
-      refreshing: false,
-      isLoading: true,
-    }));
+    dispatch(toggleRefreshing(true));
+    fetchContents().finally(() => {
+      dispatch(toggleRefreshing(false));
+    });
   };
   return (
     <SafeAreaView style={style.screen}>
